@@ -15,6 +15,7 @@ from linebot.v3.messaging import (
     ApiClient,
     MessagingApi,
     ReplyMessageRequest,
+    PushMessageRequest,
     TextMessage,
 )
 from linebot.v3.webhooks import (
@@ -50,16 +51,31 @@ def callback():
     return "OK"
 
 
+def send_reply_or_push(api_client, reply_token, user_id, messages):
+    """reply_message を試し、失敗したら push_message にフォールバック"""
+    line_bot_api = MessagingApi(api_client)
+    try:
+        line_bot_api.reply_message(
+            ReplyMessageRequest(reply_token=reply_token, messages=messages)
+        )
+        app.logger.info("Reply sent to %s", user_id)
+    except Exception as e:
+        app.logger.warning("Reply failed (%s), falling back to push_message", e)
+        line_bot_api.push_message(
+            PushMessageRequest(to=user_id, messages=messages)
+        )
+        app.logger.info("Push sent to %s", user_id)
+
+
 @handler.add(FollowEvent)
 def handle_follow(event):
     """友達追加イベント → 1通目を送信"""
     with ApiClient(configuration) as api_client:
-        line_bot_api = MessagingApi(api_client)
-        line_bot_api.reply_message(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[TextMessage(text=WELCOME_MESSAGE)],
-            )
+        send_reply_or_push(
+            api_client,
+            event.reply_token,
+            event.source.user_id,
+            [TextMessage(text=WELCOME_MESSAGE)],
         )
     app.logger.info("Sent welcome message to user: %s", event.source.user_id)
 
@@ -71,12 +87,11 @@ def handle_message(event):
 
     if user_text == "続き":
         with ApiClient(configuration) as api_client:
-            line_bot_api = MessagingApi(api_client)
-            line_bot_api.reply_message(
-                ReplyMessageRequest(
-                    reply_token=event.reply_token,
-                    messages=[TextMessage(text=CONTINUATION_MESSAGE)],
-                )
+            send_reply_or_push(
+                api_client,
+                event.reply_token,
+                event.source.user_id,
+                [TextMessage(text=CONTINUATION_MESSAGE)],
             )
         app.logger.info("Sent continuation message to user: %s", event.source.user_id)
 
