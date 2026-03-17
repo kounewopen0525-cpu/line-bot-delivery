@@ -5,6 +5,9 @@ LINE公式アカウント 自動配信システム
 """
 
 import os
+import threading
+import time
+import urllib.request
 from flask import Flask, request, abort, render_template
 from dotenv import load_dotenv
 
@@ -120,6 +123,25 @@ def screencast():
 def health():
     """ヘルスチェック用エンドポイント"""
     return "OK"
+
+
+def keep_alive():
+    """10分ごとに自分自身の/healthを叩いてRenderのスリープを防止"""
+    url = os.environ.get("RENDER_EXTERNAL_URL") or os.environ.get("BASE_URL")
+    if not url:
+        return  # ローカル開発時はスキップ
+    health_url = f"{url.rstrip('/')}/health"
+    while True:
+        time.sleep(600)  # 10分
+        try:
+            urllib.request.urlopen(health_url, timeout=10)
+        except Exception:
+            pass
+
+
+# Render上でのみkeep-aliveスレッドを起動
+if os.environ.get("RENDER"):
+    threading.Thread(target=keep_alive, daemon=True).start()
 
 
 if __name__ == "__main__":
