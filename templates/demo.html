@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Codeデモ｜日本語だけでアプリが作れる</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.8}
+.hero{background:linear-gradient(135deg,#1a0533 0%,#0d1b2a 50%,#1a0533 100%);padding:60px 20px;text-align:center}
+.hero h1{font-size:28px;font-weight:900;color:#fff;margin-bottom:12px;line-height:1.4}
+.hero h1 span{color:#a78bfa;display:block;font-size:18px;font-weight:600;margin-bottom:8px}
+.hero p{color:#94a3b8;font-size:15px;margin-bottom:30px}
+.section{padding:40px 20px;max-width:600px;margin:0 auto}
+.section h2{font-size:22px;font-weight:800;margin-bottom:20px;color:#fff;border-left:4px solid #a78bfa;padding-left:12px}
+.demo-card{background:#1e1e2e;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid #2a2a3a}
+.demo-card .label{font-size:12px;color:#a78bfa;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+.demo-card h3{font-size:18px;color:#fff;margin-bottom:8px}
+.demo-card p{font-size:14px;color:#94a3b8}
+.demo-card .time{display:inline-block;background:#a78bfa22;color:#a78bfa;font-size:13px;padding:4px 12px;border-radius:20px;margin-top:10px}
+.terminal{background:#0d1117;border-radius:12px;padding:20px;margin:20px 0;font-family:'Courier New',monospace;font-size:13px;border:1px solid #21262d;overflow-x:auto}
+.terminal .prompt{color:#7ee787}
+.terminal .cmd{color:#e6edf3}
+.terminal .output{color:#8b949e;margin-top:8px}
+.point{background:linear-gradient(135deg,#1a0533,#0d1b2a);border-radius:16px;padding:24px;margin:20px 0;border:1px solid #a78bfa33}
+.point h3{color:#a78bfa;font-size:16px;margin-bottom:8px}
+.point p{font-size:14px;color:#cbd5e1}
+.cta{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1a0533 0%,#0d1b2a 100%)}
+.cta p{font-size:16px;color:#cbd5e1;margin-bottom:20px}
+.cta a{display:inline-block;background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;font-size:16px;font-weight:700;padding:16px 40px;border-radius:50px;text-decoration:none;box-shadow:0 4px 20px #7c3aed44}
+.steps{counter-reset:step}
+.step{position:relative;padding-left:50px;margin-bottom:24px}
+.step::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:36px;height:36px;background:#a78bfa;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.step h3{color:#fff;font-size:16px;margin-bottom:4px}
+.step p{color:#94a3b8;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<h1><span>プログラミング知識ゼロでも</span>日本語で話すだけで<br>アプリが作れる時代</h1>
+<p>Claude Code × AI開発の衝撃デモ</p>
+</div>
+
+<div class="section">
+<h2>こんなものが作れます</h2>
+
+<div class="demo-card">
+<div class="label">DEMO 01</div>
+<h3>営業リスト自動収集ツール</h3>
+<p>「企業のWebサイトから会社名・電話番号・メールアドレスを自動で集めるツールを作って」と話しかけるだけ。</p>
+<span class="time">所要時間：約15分</span>
+</div>
+
+<div class="demo-card">
+<div class="label">DEMO 02</div>
+<h3>お問い合わせフォーム自動送信</h3>
+<p>「Googleスプレッドシートのリストに沿って、各企業のお問い合わせフォームに自動入力・送信するシステムを作って」</p>
+<span class="time">所要時間：約20分</span>
+</div>
+
+<div class="demo-card">
+<div class="label">DEMO 03</div>
+<h3>LINE自動配信Bot</h3>
+<p>「友達追加されたら自動でメッセージを送って、特定のキーワードに反応するLINE Botを作って」</p>
+<span class="time">所要時間：約10分</span>
+</div>
+
+<div class="point">
+<h3>ポイント</h3>
+<p>上の3つ、全部このLINEアカウントの裏側で実際に動いているシステムです。<br>全てClaude Codeで、日本語の指示だけで作りました。</p>
+</div>
+</div>
+
+<div class="section">
+<h2>実際の操作画面</h2>
+
+<div class="terminal">
+<span class="prompt">あなた：</span>
+<span class="cmd">「企業のWebサイトから情報を抽出して、Googleスプレッドシートに保存するPythonスクリプトを作って」</span>
+<div class="output">
+Claude Code: 了解しました。以下の機能を持つスクリプトを作成します...<br>
+✓ Webスクレイピング機能<br>
+✓ データ整形・クリーニング<br>
+✓ Google Sheets API連携<br>
+✓ エラーハンドリング<br><br>
+→ ファイルを作成しました: scraper.py<br>
+→ 依存パッケージをインストールしました<br>
+→ テスト実行... 成功 ✓
+</div>
+</div>
+
+<p style="color:#94a3b8;font-size:14px;text-align:center">これが実際の操作です。コードは1行も書いていません。</p>
+</div>
+
+<div class="section">
+<h2>なぜClaude Codeなのか</h2>
+
+<div class="steps">
+<div class="step">
+<h3>日本語で指示するだけ</h3>
+<p>プログラミング言語を覚える必要なし。やりたいことを日本語で伝えるだけ。</p>
+</div>
+<div class="step">
+<h3>実用的なツールが数分で完成</h3>
+<p>外注すれば数十万円かかるツールが、自分の手で数分〜数十分で作れる。</p>
+</div>
+<div class="step">
+<h3>修正も日本語で一瞬</h3>
+<p>「ここをこう変えて」と言うだけ。トライ＆エラーのスピードが桁違い。</p>
+</div>
+</div>
+</div>
+
+<div class="cta">
+<p>まずは自分で触ってみてください。<br>「自分にもできるかも」が確信に変わります。</p>
+<a href="/guide">Claude Codeの登録方法を見る →</a>
+</div>
+
+</body>
+</html>

@@ -1,9 +1,13 @@
 # LINE自動配信メッセージテンプレート
-# TODO: リンクを実際のURLに差し替えてください
+# URLはFlaskアプリ内のページを参照（環境変数BASE_URLで制御）
 
-DEMO_VIDEO_URL = "https://example.com/demo-video"  # TODO: デモ動画のURL
-REGISTRATION_GUIDE_URL = "https://example.com/registration"  # TODO: 登録方法のURL
-BRAIN_URL = "https://example.com/brain"  # TODO: BrainのURL
+import os
+
+BASE_URL = os.environ.get("BASE_URL", "https://awrra-240b-10-f02-b600-6818-aedc-60f6-4a6b.a.free.pinggy.link")
+
+DEMO_VIDEO_URL = f"{BASE_URL}/screencast"
+REGISTRATION_GUIDE_URL = f"{BASE_URL}/guide"
+BRAIN_URL = f"{BASE_URL}/brain"
 
 
 # ============================================================

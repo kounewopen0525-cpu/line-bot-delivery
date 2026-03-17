@@ -5,7 +5,7 @@ LINE公式アカウント 自動配信システム
 """
 
 import os
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 from dotenv import load_dotenv
 
 from linebot.v3 import WebhookHandler
@@ -79,6 +79,26 @@ def handle_message(event):
                 )
             )
         app.logger.info("Sent continuation message to user: %s", event.source.user_id)
+
+
+@app.route("/demo")
+def demo():
+    return render_template("demo.html")
+
+
+@app.route("/guide")
+def guide():
+    return render_template("guide.html")
+
+
+@app.route("/brain")
+def brain():
+    return render_template("brain.html")
+
+
+@app.route("/screencast")
+def screencast():
+    return render_template("screencast.html")
 
 
 @app.route("/health", methods=["GET"])

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Epilogue:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1e1e2e;font-family:'Courier New','SF Mono','Menlo',monospace;overflow:hidden;height:100vh}
+
+/* === TERMINAL === */
+#terminal-wrap{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.8s, transform 0.8s;z-index:10;
+}
+#terminal-wrap.hide{opacity:0;transform:scale(0.95);pointer-events:none}
+.terminal{
+  width:100%;max-width:800px;height:88vh;background:#0d1117;border-radius:12px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);display:flex;flex-direction:column;
+}
+.titlebar{
+  background:#161b22;padding:10px 16px;display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid #21262d;flex-shrink:0;
+}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.titlebar-text{color:#8b949e;font-size:12px;margin-left:12px;font-family:-apple-system,sans-serif}
+.content{flex:1;overflow-y:auto;padding:16px;font-size:13px;line-height:1.7;scrollbar-width:none}
+.content::-webkit-scrollbar{display:none}
+.line{margin-bottom:2px;white-space:pre-wrap;word-break:break-all}
+.prompt{color:#7ee787}.user-input{color:#e6edf3}.ai-text{color:#c9d1d9}
+.dim{color:#484f58}.success{color:#3fb950}.info{color:#58a6ff}.warn{color:#d29922}
+.thinking{color:#8b949e;font-style:italic}
+pre.code-block{
+  background:#161b22;border:1px solid #21262d;border-radius:6px;
+  padding:12px;margin:8px 0;color:#e6edf3;font-size:11px;
+  overflow-x:auto;white-space:pre;font-family:inherit;line-height:1.4;
+}
+.cursor-blink{
+  display:inline-block;width:8px;height:15px;background:#e6edf3;
+  animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.progress-bar{background:#21262d;border-radius:4px;height:6px;margin:4px 0;overflow:hidden}
+.progress-fill{background:linear-gradient(90deg,#a78bfa,#7c3aed);height:100%;border-radius:4px;transition:width 0.3s}
+.stats-bar{
+  background:#161b22;border-top:1px solid #21262d;padding:8px 16px;
+  display:flex;justify-content:space-between;font-size:11px;color:#484f58;flex-shrink:0;
+}
+
+/* === KURØ WEBSITE === */
+#website-wrap{
+  position:absolute;inset:0;opacity:0;transform:translateY(30px);
+  transition:opacity 1s ease, transform 1s ease;z-index:5;overflow-y:auto;
+  overflow-x:hidden;scroll-behavior:auto;
+}
+#website-wrap.show{opacity:1;transform:translateY(0)}
+#website-wrap::-webkit-scrollbar{display:none}
+
+/* Scroller & Stage */
+#scroller{height:700vh;position:relative}
+#stage{position:sticky;top:0;width:100%;height:100vh;overflow:hidden}
+#mainCanvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* Progress bar */
+#kuro-progress{
+  position:absolute;top:0;left:0;height:2px;z-index:200;width:0%;
+  background:linear-gradient(90deg,#c9a96e,#e8c97a);
+  pointer-events:none;
+}
+
+/* Nav */
+.kuro-nav{
+  position:absolute;top:0;left:0;right:0;z-index:100;
+  padding:28px 40px;display:flex;justify-content:space-between;align-items:center;
+  mix-blend-mode:difference;pointer-events:none;
+}
+.kuro-nav span{
+  font-family:'Playfair Display',serif;font-size:14px;letter-spacing:4px;color:#fff;
+}
+
+/* Chapter indicators */
+.ch-ind{
+  position:absolute;bottom:28px;z-index:100;font-family:'Epilogue',sans-serif;
+  font-size:11px;letter-spacing:3px;color:rgba(240,235,226,0.4);
+  pointer-events:none;
+}
+#chLeft{left:40px}
+#chRight{right:40px;text-align:right}
+
+/* Scene texts */
+.scene-text{
+  position:absolute;z-index:50;pointer-events:none;
+  opacity:0;transition:opacity 0.7s ease, transform 0.7s ease;
+}
+.scene-text.show{opacity:1;transform:none!important}
+
+#scene0{bottom:18%;left:8%;transform:translateY(30px)}
+#scene0 h1{
+  font-family:'Playfair Display',serif;font-size:clamp(48px,7.5vw,96px);
+  font-weight:400;color:#f0ebe2;line-height:1.2;
+}
+#scene0 h1 em{font-style:italic;color:#c9a96e}
+
+#scene1{top:50%;left:50%;transform:translate(-50%,-50%) translateY(20px)}
+#scene1 h2{
+  font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,56px);
+  font-weight:400;color:#f0ebe2;text-align:center;
+}
+#scene1 h2 em{font-style:italic;color:#c9a96e}
+#scene1 .coord{
+  font-family:'Epilogue',sans-serif;font-size:12px;letter-spacing:4px;
+  color:rgba(201,169,110,0.5);text-align:center;margin-top:12px;
+}
+
+#scene2{top:50%;right:8%;transform:translateX(20px)}
+#scene2 h2{
+  font-family:'Playfair Display',serif;font-size:clamp(48px,6vw,72px);
+  font-weight:700;color:#f0ebe2;
+}
+#scene2 .sub{
+  font-family:'Epilogue',sans-serif;font-size:11px;letter-spacing:4px;
+  color:rgba(201,169,110,0.5);margin-top:8px;
+}
+
+#scene3{bottom:15%;left:8%;transform:translateY(20px)}
+#scene3 h2{
+  font-family:'Playfair Display',serif;font-size:clamp(60px,9vw,120px);
+  font-weight:400;color:#f0ebe2;font-variant-numeric:tabular-nums;
+}
+#scene3 .sub{
+  font-family:'Epilogue',sans-serif;font-size:12px;letter-spacing:4px;
+  color:rgba(201,169,110,0.5);margin-top:4px;
+}
+
+#scene4{top:50%;left:50%;transform:translate(-50%,-50%) translateY(20px);text-align:center}
+#scene4 h2{
+  font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,48px);
+  font-weight:400;font-style:italic;color:#f0ebe2;margin-bottom:32px;
+}
+#scene4 .cta-row{display:flex;gap:16px;justify-content:center}
+#scene4 .cta{
+  font-family:'Epilogue',sans-serif;font-size:12px;letter-spacing:3px;
+  padding:14px 32px;border:1px solid rgba(201,169,110,0.3);color:#c9a96e;
+  text-transform:uppercase;cursor:pointer;transition:all 0.3s;background:transparent;
+}
+#scene4 .cta:hover{background:rgba(201,169,110,0.1);border-color:#c9a96e}
+#scene4 .cta.primary{background:rgba(201,169,110,0.12)}
+
+/* Menu section */
+.kuro-menu{
+  background:#0d0a07;padding:100px 40px;min-height:100vh;
+  font-family:'Epilogue',sans-serif;
+}
+.kuro-menu .sec-label{
+  font-size:11px;letter-spacing:6px;color:#c9a96e;text-transform:uppercase;
+  display:block;margin-bottom:12px;font-weight:400;
+}
+.kuro-menu h2{
+  font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,48px);
+  font-weight:400;color:#f0ebe2;margin-bottom:56px;
+}
+.menu-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;max-width:900px;
+  background:rgba(201,169,110,0.06);
+}
+.menu-card{
+  background:#0d0a07;padding:32px;position:relative;overflow:hidden;
+  opacity:0;transform:translateY(28px);transition:all 0.7s ease;
+}
+.menu-card.vis{opacity:1;transform:none}
+.menu-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:#c9a96e;transform:scaleX(0);transform-origin:left;
+  transition:transform 0.6s ease;
+}
+.menu-card:hover::after{transform:scaleX(1)}
+.menu-card .num{
+  font-size:11px;letter-spacing:3px;color:rgba(201,169,110,0.3);
+  margin-bottom:12px;display:block;
+}
+.menu-card .name{
+  font-family:'Playfair Display',serif;font-size:20px;color:#f0ebe2;
+  margin-bottom:4px;display:block;
+}
+.menu-card .price{
+  font-size:14px;color:#c9a96e;letter-spacing:2px;margin-bottom:8px;display:block;
+}
+.menu-card .desc{font-size:12px;color:rgba(240,235,226,0.35);letter-spacing:1px}
+
+/* Footer */
+.kuro-footer{
+  background:#060503;padding:48px 40px;text-align:center;
+  border-top:1px solid rgba(201,169,110,0.06);
+}
+.kuro-footer .logo{
+  font-family:'Playfair Display',serif;font-size:18px;letter-spacing:8px;
+  color:rgba(240,235,226,0.3);margin-bottom:12px;
+}
+.kuro-footer .info{
+  font-family:'Epilogue',sans-serif;font-size:11px;letter-spacing:2px;
+  color:rgba(240,235,226,0.15);line-height:2;
+}
+
+/* Custom cursor */
+#cdot{
+  position:fixed;width:6px;height:6px;background:#c9a96e;border-radius:50%;
+  pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+  transition:opacity 0.3s;opacity:0;
+}
+#ctrail{
+  position:fixed;width:28px;height:28px;border:1px solid rgba(201,169,110,0.35);
+  border-radius:50%;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);transition:width 0.18s,height 0.18s,opacity 0.3s;opacity:0;
+}
+#website-wrap.show ~ #cdot,
+#website-wrap.show ~ #ctrail{opacity:1}
+
+@media(max-width:600px){
+  .terminal{height:100vh;border-radius:0}
+  .content{font-size:12px;padding:12px}
+  .kuro-nav{padding:16px 20px}
+  .ch-ind{display:none}
+  .menu-grid{grid-template-columns:1fr}
+  #cdot,#ctrail{display:none}
+  #scene0{left:5%;bottom:12%}
+}
+</style>
+</head>
+<body>
+
+<!-- TERMINAL -->
+<div id="terminal-wrap">
+<div class="terminal">
+  <div class="titlebar">
+    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+    <span class="titlebar-text">claude &mdash; ~/projects</span>
+  </div>
+  <div class="content" id="output"></div>
+  <div class="stats-bar">
+    <span>Claude Code v1.0.16</span>
+    <span id="tokens">Token: 0</span>
+  </div>
+</div>
+</div>
+
+<!-- KURØ WEBSITE -->
+<div id="website-wrap">
+  <div id="scroller">
+    <div id="stage">
+      <canvas id="mainCanvas"></canvas>
+      <div id="kuro-progress"></div>
+      <nav class="kuro-nav"><span>KUR&Oslash;</span><span>CAF&Eacute;</span></nav>
+      <div class="ch-ind" id="chLeft">01 / 05</div>
+      <div class="ch-ind" id="chRight">Intro</div>
+
+      <div class="scene-text" id="scene0">
+        <h1>静寂を、<br><em>一杯に。</em></h1>
+      </div>
+      <div class="scene-text" id="scene1">
+        <h2>Ethiopia<br><em>Yirgacheffe</em></h2>
+        <div class="coord">6&deg;52'N 38&deg;12'E</div>
+      </div>
+      <div class="scene-text" id="scene2">
+        <h2>200&deg;C</h2>
+        <div class="sub">MEDIUM&ndash;DARK ROAST</div>
+      </div>
+      <div class="scene-text" id="scene3">
+        <h2 id="timerText">27s</h2>
+        <div class="sub">EXTRACTION TIME</div>
+      </div>
+      <div class="scene-text" id="scene4">
+        <h2>Your cup is ready.</h2>
+        <div class="cta-row">
+          <button class="cta primary">VIEW MENU</button>
+          <button class="cta">RESERVE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="kuro-menu">
+    <span class="sec-label">MENU</span>
+    <h2>Our Selection</h2>
+    <div class="menu-grid">
+      <div class="menu-card"><span class="num">001</span><span class="name">Pour Over</span><span class="price">&yen;900</span><span class="desc">Hario V60 &middot; Single origin</span></div>
+      <div class="menu-card"><span class="num">002</span><span class="name">Espresso</span><span class="price">&yen;700</span><span class="desc">Double shot &middot; 27s extraction</span></div>
+      <div class="menu-card"><span class="num">003</span><span class="name">Flat White</span><span class="price">&yen;850</span><span class="desc">Double ristretto &middot; Microfoam</span></div>
+      <div class="menu-card"><span class="num">004</span><span class="name">Cold Brew</span><span class="price">&yen;950</span><span class="desc">18h cold steep &middot; Colombian Huila</span></div>
+      <div class="menu-card"><span class="num">005</span><span class="name">Cortado</span><span class="price">&yen;800</span><span class="desc">Equal parts espresso &amp; steamed milk</span></div>
+      <div class="menu-card"><span class="num">006</span><span class="name">Seasonal</span><span class="price">&yen;1,000</span><span class="desc">Ask the barista &middot; Always rotating</span></div>
+    </div>
+  </section>
+
+  <footer class="kuro-footer">
+    <div class="logo">KUR&Oslash; CAF&Eacute;</div>
+    <div class="info">2-14-8 Kitazawa, Setagaya-ku, Tokyo 155-0031<br>Mon&ndash;Fri 8:00&ndash;19:00 / Sat&ndash;Sun 9:00&ndash;20:00</div>
+  </footer>
+</div>
+
+<!-- Cursor (outside website-wrap for true fixed positioning fallback) -->
+<div id="cdot"></div>
+<div id="ctrail"></div>
+
+<script>
+/* ====== TERMINAL ANIMATION ====== */
+const O=document.getElementById('output'),TK=document.getElementById('tokens');
+let tc=0;
+const S=ms=>new Promise(r=>setTimeout(r,ms));
+const scr=()=>{O.scrollTop=O.scrollHeight};
+const tk=n=>{tc+=n;TK.textContent='Token: '+tc.toLocaleString()};
+
+async function line(h,d=0){if(d)await S(d);const e=document.createElement('div');e.className='line';e.innerHTML=h;O.appendChild(e);scr();return e}
+async function type(txt,spd=20){
+  const d=document.createElement('div');d.className='line';
+  d.innerHTML='<span class="prompt">&#10095; </span>';
+  const t=document.createElement('span');t.className='user-input';d.appendChild(t);
+  const c=document.createElement('span');c.className='cursor-blink';d.appendChild(c);
+  O.appendChild(d);scr();
+  for(let i=0;i<txt.length;i++){t.textContent+=txt[i];scr();await S(spd+Math.random()*12)}
+  c.remove();
+}
+async function think(ms=1200){
+  const d=await line('<span class="thinking">  Thinking...</span>');
+  const s=d.querySelector('.thinking');const t0=Date.now();
+  const iv=setInterval(()=>{s.textContent='  Thinking'+'.'.repeat((Math.floor((Date.now()-t0)/300)%4)+1)},300);
+  await S(ms);clearInterval(iv);d.remove();
+}
+async function ai(txt,spd=4){
+  const d=document.createElement('div');d.className='line';
+  const s=document.createElement('span');s.className='ai-text';d.appendChild(s);
+  O.appendChild(d);scr();
+  for(let i=0;i<txt.length;i++){s.textContent+=txt[i];scr();await S(spd)}
+  tk(Math.floor(txt.length/2));
+}
+async function code(c){
+  await S(100);const p=document.createElement('pre');p.className='code-block';O.appendChild(p);scr();
+  for(let i=0;i<c.length;i++){p.textContent+=c[i];scr();await S(1)}
+  tk(Math.floor(c.length/2));
+}
+async function prog(label,ms=600){
+  const w=document.createElement('div');w.className='line';w.innerHTML='<span class="info">  '+label+'</span>';O.appendChild(w);
+  const b=document.createElement('div');b.className='progress-bar';b.innerHTML='<div class="progress-fill" style="width:0%"></div>';O.appendChild(b);scr();
+  const f=b.querySelector('.progress-fill');
+  for(let i=1;i<=12;i++){f.style.width=(i/12*100)+'%';await S(ms/12)}
+  await S(80);b.remove();
+}
+
+async function run(){
+  await line('<span class="dim">\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E</span>');
+  await S(20);
+  await line('<span class="dim">\u2502</span>  <span style="color:#a78bfa;font-weight:bold">Claude Code</span> <span class="dim">v1.0.16</span>              <span class="dim">\u2502</span>');
+  await S(20);
+  await line('<span class="dim">\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F</span>');
+  await S(150);
+  await line('<span class="dim">  cwd: ~/projects</span>',80);
+  await S(400);await line('');
+
+  await type('\u304A\u3057\u3083\u308C\u306A\u30AB\u30D5\u30A7\u306E\u30DB\u30FC\u30E0\u30DA\u30FC\u30B8\u3092\u4F5C\u3063\u3066');
+  await S(300);await line('');
+
+  await think(1200);tk(280);
+  await ai('  \u30B7\u30CD\u30DE\u30C6\u30A3\u30C3\u30AF\u306A\u30B9\u30AF\u30ED\u30FC\u30EB\u4F53\u9A13\u578B\u306E\u30AB\u30D5\u30A7\u30B5\u30A4\u30C8\u3092\u4F5C\u6210\u3057\u307E\u3059\u3002');
+  await S(80);await line('');
+  await ai('  Canvas 2D\u3067\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0\u63CF\u753B\u3001\u30B9\u30AF\u30ED\u30FC\u30EB\u9023\u52D5\u30695\u30B7\u30FC\u30F3\u3092\u5207\u308A\u66FF\u3048\u307E\u3059\uFF1A');
+  await S(60);
+  await line('<span class="ai-text">  \u30FB Intro \u2014 \u30B4\u30FC\u30EB\u30C9\u30B0\u30ED\u30FC + \u30D1\u30FC\u30C6\u30A3\u30AF\u30EB</span>',30);
+  await line('<span class="ai-text">  \u30FB Origin \u2014 \u30A8\u30C1\u30AA\u30D4\u30A2\u8FB2\u5712\u306E\u591C\u666F</span>',30);
+  await line('<span class="ai-text">  \u30FB Roast \u2014 \u7130\u3068\u30B9\u30D1\u30FC\u30AF\u30A8\u30D5\u30A7\u30AF\u30C8</span>',30);
+  await line('<span class="ai-text">  \u30FB Extract \u2014 \u30C9\u30EA\u30C3\u30D7\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3</span>',30);
+  await line('<span class="ai-text">  \u30FB Cup \u2014 \u30AB\u30C3\u30D7\u63CF\u753B + \u30B9\u30C1\u30FC\u30E0</span>',30);
+  await S(150);await line('');
+
+  await line('<span class="success">  \u2713 Created: index.html</span>',100);await S(60);
+  await code(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <title>KURØ CAFÉ</title>
+  <link href="fonts.googleapis.com/Playfair+Display|Epilogue">
+</head>
+<body>
+  <canvas id="mainCanvas"></canvas>
+  <div id="scroller">
+    <div id="stage">
+      <section class="scene" id="intro">...</section>
+      <section class="scene" id="origin">...</section>
+      <section class="scene" id="roast">...</section>
+      <section class="scene" id="extract">...</section>
+      <section class="scene" id="cup">...</section>
+    </div>
+  </div>
+  <section class="menu">...</section>
+</body>
+</html>`);
+
+  await S(200);await line('');
+  await line('<span class="success">  \u2713 Created: app.js</span>',80);await S(60);
+  await code(`const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+const SCENES = 5;
+
+function render(scrollProgress) {
+  const raw = scrollProgress * SCENES;
+  const idx = Math.floor(raw);
+  const local = raw - idx;
+
+  ctx.clearRect(0, 0, W, H);
+  scenes[idx].draw(ctx, local, tick);
+
+  // Cross-fade blend
+  if (local > 0.7 && idx < 4) {
+    ctx.globalAlpha = (local - 0.7) / 0.3;
+    scenes[idx + 1].draw(ctx, 0, tick);
+    ctx.globalAlpha = 1;
+  }
+}
+
+requestAnimationFrame(function loop() {
+  tick++;
+  const p = scrollY / maxScroll;
+  render(p);
+  requestAnimationFrame(loop);
+});`);
+
+  await S(200);await line('');
+  await line('<span class="success">  \u2713 Created: style.css (custom cursor, scene transitions)</span>',80);
+  await S(100);await line('');
+
+  await prog('Optimizing Canvas rendering...',500);
+  await line('<span class="success">  \u2713 60fps verified on all scenes</span>',40);
+  await line('<span class="success">  \u2713 Retina display support (devicePixelRatio)</span>',40);
+  await S(100);await line('');
+
+  await ai('  \u30D7\u30EC\u30D3\u30E5\u30FC\u3092\u958B\u304D\u307E\u3059...');
+  await S(200);
+  await line('<span class="info">  \u2192 http://localhost:3000</span>',100);
+  await S(300);
+  await line('<span class="success">  \u2713 Lighthouse: Performance 99 / Accessibility 100</span>',100);
+  await S(200);await line('');
+
+  await line('<span class="dim">\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</span>',80);
+  await ai('  \u30AB\u30D5\u30A7\u306E\u30DB\u30FC\u30E0\u30DA\u30FC\u30B8\u304C\u5B8C\u6210\u3057\u307E\u3057\u305F\u3002');
+  await ai('  \u30B3\u30FC\u30C9\u306F1\u884C\u3082\u66F8\u3044\u3066\u3044\u307E\u305B\u3093\u3002\u6240\u8981\u6642\u9593\uFF1A\u7D045\u5206\u3002');
+  await S(800);
+
+  /* ====== TRANSITION ====== */
+  await S(500);
+  document.getElementById('terminal-wrap').classList.add('hide');
+  await S(400);
+  const ws=document.getElementById('website-wrap');
+  ws.classList.add('show');
+  await S(700);
+  initKuro(ws);
+  await S(2500);
+
+  // Auto-scroll
+  const totalH=ws.scrollHeight-ws.clientHeight;
+  const duration=26000;
+  const t0=Date.now();
+  function autoScroll(){
+    const el=Date.now()-t0;
+    const p=Math.min(el/duration,1);
+    const ease=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    ws.scrollTop=ease*totalH;
+    if(p<1)requestAnimationFrame(autoScroll);
+  }
+  autoScroll();
+}
+
+/* ====== KURØ CANVAS ENGINE ====== */
+function initKuro(ws){
+  const canvas=document.getElementById('mainCanvas');
+  const ctx=canvas.getContext('2d');
+  const stage=document.getElementById('stage');
+  let W,H;
+
+  function resize(){
+    const dpr=window.devicePixelRatio||1;
+    W=stage.clientWidth;H=stage.clientHeight;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  // Particles
+  const mkP=(n,fn)=>Array.from({length:n},(_,i)=>fn(i));
+  const introP=mkP(80,()=>({x:Math.random(),y:Math.random(),s:0.3+Math.random()*0.7,a:0.2+Math.random()*0.6}));
+  const originP=mkP(35,()=>({x:Math.random(),y:0.5+Math.random()*0.4,ph:Math.random()*Math.PI*2}));
+  const roastP=mkP(60,()=>({x:0.35+Math.random()*0.3,y:0.95,life:Math.random(),spd:0.5+Math.random()}));
+  const extractP=mkP(18,()=>({off:Math.random()}));
+  const steamP=mkP(7,()=>({ph:Math.random()*Math.PI*2}));
+
+  const sceneNames=['Intro','Origin','Roast','Extract','Cup'];
+  const sceneIds=['scene0','scene1','scene2','scene3','scene4'];
+
+  /* --- Scene Draws --- */
+  function drawIntro(t,blend){
+    ctx.fillStyle='#0a0705';ctx.fillRect(0,0,W,H);
+    // Radial glow
+    const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.55);
+    g.addColorStop(0,'rgba(201,169,110,0.12)');g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    // Concentric rings
+    for(let i=0;i<4;i++){
+      const r=(W*0.1)+i*W*0.08;
+      const pulse=1+Math.sin(t*0.004+i*1.2)*0.08;
+      ctx.beginPath();ctx.arc(W/2,H/2,r*pulse,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(201,169,110,${0.03+i*0.008})`;ctx.lineWidth=1;ctx.stroke();
+    }
+    // Particles
+    introP.forEach(p=>{
+      p.y-=p.s*0.0008;if(p.y<-0.02){p.y=1.02;p.x=Math.random()}
+      ctx.beginPath();ctx.arc(p.x*W,p.y*H,1.5,0,Math.PI*2);
+      ctx.fillStyle=`rgba(201,169,110,${p.a*blend*0.5})`;ctx.fill();
+    });
+  }
+
+  function drawOrigin(t,blend){
+    // Sky gradient
+    const sky=ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,'#080f08');sky.addColorStop(0.5,'#121c0c');sky.addColorStop(1,'#231408');
+    ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+    // Horizon glow
+    const hg=ctx.createRadialGradient(W/2,H*0.75,0,W/2,H*0.75,W*0.6);
+    hg.addColorStop(0,'rgba(180,140,60,0.18)');hg.addColorStop(1,'transparent');
+    ctx.fillStyle=hg;ctx.fillRect(0,0,W,H);
+    // Hill 1
+    ctx.beginPath();ctx.moveTo(0,H);
+    for(let x=0;x<=W;x+=3){
+      ctx.lineTo(x,H*(0.72+Math.sin(x*0.004+1.2)*0.04+Math.sin(x*0.009+0.5)*0.025));
+    }
+    ctx.lineTo(W,H);ctx.fillStyle='#0c1608';ctx.fill();
+    // Hill 2
+    ctx.beginPath();ctx.moveTo(0,H);
+    for(let x=0;x<=W;x+=3){
+      ctx.lineTo(x,H*(0.8+Math.sin(x*0.005+2.4)*0.035));
+    }
+    ctx.lineTo(W,H);ctx.fillStyle='#081005';ctx.fill();
+    // Fireflies
+    originP.forEach(p=>{
+      p.ph+=0.018;p.x+=Math.sin(p.ph)*0.0004;
+      const a=(Math.sin(p.ph*2)*0.5+0.5)*0.5*blend;
+      if(a>0.05){
+        const fg=ctx.createRadialGradient(p.x*W,p.y*H,0,p.x*W,p.y*H,5);
+        fg.addColorStop(0,`rgba(180,220,100,${a})`);fg.addColorStop(1,'transparent');
+        ctx.fillStyle=fg;ctx.fillRect(p.x*W-5,p.y*H-5,10,10);
+      }
+    });
+  }
+
+  function drawRoast(t,blend,local){
+    ctx.fillStyle='#080402';ctx.fillRect(0,0,W,H);
+    // Flame glow
+    const fg=ctx.createRadialGradient(W/2,H*1.1,0,W/2,H*1.1,H*0.8);
+    fg.addColorStop(0,'rgba(230,90,20,0.25)');fg.addColorStop(1,'transparent');
+    ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
+    // Sparks
+    roastP.forEach(p=>{
+      p.life+=0.007*p.spd;if(p.life>1){p.life=0;p.x=0.38+Math.random()*0.24;p.y=0.92}
+      p.y-=p.spd*0.0025;p.x+=(Math.random()-0.5)*0.002;
+      const fade=Math.sin(p.life*Math.PI);
+      const h=Math.random()*30;
+      ctx.beginPath();ctx.arc(p.x*W,p.y*H,1.5*fade,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${200+h|0},${80+h*2|0},30,${fade*0.7*blend})`;ctx.fill();
+    });
+    // Temperature arc
+    const cx=W/2,cy=H/2,radius=Math.min(W,H)*0.25;
+    ctx.beginPath();ctx.arc(cx,cy,radius,-0.8*Math.PI,0.8*Math.PI);
+    ctx.strokeStyle='rgba(201,169,110,0.07)';ctx.lineWidth=2;ctx.stroke();
+    const endA=-0.8*Math.PI+local*1.6*Math.PI;
+    const ag=ctx.createLinearGradient(cx-radius,cy,cx+radius,cy);
+    ag.addColorStop(0,'#e85a14');ag.addColorStop(1,'#c9a96e');
+    ctx.beginPath();ctx.arc(cx,cy,radius,-0.8*Math.PI,endA);
+    ctx.strokeStyle=ag;ctx.lineWidth=3;ctx.stroke();
+  }
+
+  function drawExtract(t,blend){
+    ctx.fillStyle='#050302';ctx.fillRect(0,0,W,H);
+    // Spotlight
+    const sg=ctx.createRadialGradient(W/2,H*0.15,0,W/2,H*0.15,H*0.7);
+    sg.addColorStop(0,'rgba(201,169,110,0.1)');sg.addColorStop(1,'transparent');
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+    // Portafilter
+    const pw=W*0.16,ph=H*0.05,px=W/2,py=H*0.30;
+    ctx.beginPath();
+    ctx.moveTo(px-pw/2,py);ctx.lineTo(px+pw/2,py);
+    ctx.lineTo(px+pw*0.35,py+ph);ctx.lineTo(px-pw*0.35,py+ph);
+    ctx.closePath();ctx.fillStyle='rgba(30,18,8,0.9)';ctx.fill();
+    ctx.strokeStyle='rgba(201,169,110,0.1)';ctx.lineWidth=1;ctx.stroke();
+    // Drips
+    extractP.forEach((d,i)=>{
+      const phase=(t*0.012+d.off*6.28)%1;
+      const dx=px+(i-extractP.length/2)*5.5;
+      const dy=py+ph+phase*H*0.42;
+      const fade=Math.sin(phase*Math.PI);
+      ctx.beginPath();ctx.arc(dx,dy,1.8,0,Math.PI*2);
+      ctx.fillStyle=`rgba(139,90,43,${fade*0.6*blend})`;ctx.fill();
+    });
+    // Pool
+    const pg=ctx.createRadialGradient(W/2,H*0.82,0,W/2,H*0.82,W*0.22);
+    pg.addColorStop(0,'rgba(80,45,15,0.35)');pg.addColorStop(1,'transparent');
+    ctx.fillStyle=pg;ctx.fillRect(0,0,W,H);
+  }
+
+  function drawCup(t,blend){
+    ctx.fillStyle='#0a0705';ctx.fillRect(0,0,W,H);
+    // Ambient
+    const ag=ctx.createRadialGradient(W/2,H*0.55,0,W/2,H*0.55,W*0.38);
+    ag.addColorStop(0,'rgba(201,169,110,0.12)');ag.addColorStop(1,'transparent');
+    ctx.fillStyle=ag;ctx.fillRect(0,0,W,H);
+    const cx=W/2,cy=H*0.56,sc=Math.min(W,H)/500;
+    // Saucer
+    ctx.beginPath();ctx.ellipse(cx,cy+52*sc,85*sc,14*sc,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(201,169,110,0.06)';ctx.fill();
+    ctx.strokeStyle='rgba(201,169,110,0.12)';ctx.lineWidth=1;ctx.stroke();
+    // Cup
+    ctx.beginPath();
+    ctx.moveTo(cx-46*sc,cy-32*sc);ctx.lineTo(cx+46*sc,cy-32*sc);
+    ctx.quadraticCurveTo(cx+40*sc,cy+42*sc,cx,cy+46*sc);
+    ctx.quadraticCurveTo(cx-40*sc,cy+42*sc,cx-46*sc,cy-32*sc);
+    ctx.fillStyle='rgba(20,14,8,0.9)';ctx.fill();
+    ctx.strokeStyle='rgba(201,169,110,0.15)';ctx.lineWidth=1;ctx.stroke();
+    // Coffee surface
+    ctx.beginPath();ctx.ellipse(cx,cy-30*sc,43*sc,9*sc,0,0,Math.PI*2);
+    const cg=ctx.createRadialGradient(cx,cy-30*sc,0,cx,cy-30*sc,43*sc);
+    cg.addColorStop(0,'rgba(160,100,40,0.55)');cg.addColorStop(0.6,'rgba(80,45,20,0.4)');
+    cg.addColorStop(1,'rgba(40,22,10,0.3)');
+    ctx.fillStyle=cg;ctx.fill();
+    // Handle
+    ctx.beginPath();ctx.arc(cx+56*sc,cy+2*sc,18*sc,-0.5*Math.PI,0.5*Math.PI);
+    ctx.strokeStyle='rgba(201,169,110,0.15)';ctx.lineWidth=2;ctx.stroke();
+    // Steam
+    ctx.save();ctx.globalAlpha=blend*0.35;
+    steamP.forEach((s,i)=>{
+      const phase=(t*0.006+s.ph)%1;
+      const sx=cx+(i-3)*9*sc,sy=cy-42*sc;
+      const h=phase*65*sc;
+      const fade=Math.sin(phase*Math.PI);
+      const sway=Math.sin(t*0.008+i*2)*10*sc;
+      ctx.beginPath();ctx.moveTo(sx,sy);
+      ctx.quadraticCurveTo(sx+sway,sy-h/2,sx+sway*0.4,sy-h);
+      ctx.strokeStyle=`rgba(201,169,110,${fade*0.3})`;ctx.lineWidth=1.5;ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  const sceneFns=[drawIntro,drawOrigin,drawRoast,drawExtract,drawCup];
+  let tick=0;
+
+  function animate(){
+    tick++;
+    const scrollerEl=document.getElementById('scroller');
+    const canvasMax=scrollerEl.offsetHeight-window.innerHeight;
+    const cp=Math.min(Math.max(ws.scrollTop/canvasMax,0),1);
+
+    // Progress bar
+    const totalMax=ws.scrollHeight-ws.clientHeight;
+    const totalP=ws.scrollTop/totalMax;
+    document.getElementById('kuro-progress').style.width=(totalP*100)+'%';
+
+    // Scene calc
+    const raw=Math.min(cp*5,4.999);
+    const idx=Math.floor(raw);
+    const local=raw-idx;
+    const blend=local<0.15?local/0.15:(idx<4&&local>0.85)?(1-local)/0.15:1;
+
+    // Chapter indicator
+    document.getElementById('chLeft').textContent=String(idx+1).padStart(2,'0')+' / 05';
+    document.getElementById('chRight').textContent=sceneNames[idx];
+
+    // Draw
+    ctx.save();
+    ctx.globalAlpha=1;
+    sceneFns[idx](tick,blend,local);
+    // Cross-fade
+    if(idx<4&&local>0.7){
+      ctx.globalAlpha=(local-0.7)/0.3;
+      sceneFns[idx+1](tick,1,0);
+      ctx.globalAlpha=1;
+    }
+    ctx.restore();
+
+    // Scene text
+    sceneIds.forEach((id,i)=>{
+      document.getElementById(id).classList.toggle('show',i===idx&&blend>0.3);
+    });
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Menu cards reveal
+  const mObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');mObs.unobserve(e.target)}});
+  },{root:ws,threshold:0.1});
+  document.querySelectorAll('.menu-card').forEach((c,i)=>{
+    c.style.transitionDelay=(i*0.08)+'s';
+    mObs.observe(c);
+  });
+
+  // Custom cursor
+  let mx=0,my=0,tx=0,ty=0;
+  const dot=document.getElementById('cdot'),trail=document.getElementById('ctrail');
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;
+    dot.style.left=mx+'px';dot.style.top=my+'px';
+  });
+  (function cursorLoop(){
+    tx+=(mx-tx)*0.11;ty+=(my-ty)*0.11;
+    trail.style.left=tx+'px';trail.style.top=ty+'px';
+    requestAnimationFrame(cursorLoop);
+  })();
+}
+
+window.addEventListener('load',()=>setTimeout(run,500));
+</script>
+</body>
+</html>

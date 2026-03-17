@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 登録ガイド｜5分で始められる</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.8}
+.hero{background:linear-gradient(135deg,#0d1b2a 0%,#1a0533 50%,#0d1b2a 100%);padding:50px 20px;text-align:center}
+.hero h1{font-size:26px;font-weight:900;color:#fff;margin-bottom:8px}
+.hero p{color:#94a3b8;font-size:15px}
+.section{padding:30px 20px;max-width:600px;margin:0 auto}
+.section h2{font-size:20px;font-weight:800;margin-bottom:20px;color:#fff;border-left:4px solid #7ee787;padding-left:12px}
+.step-card{background:#1e1e2e;border-radius:16px;padding:24px;margin-bottom:16px;border:1px solid #2a2a3a;position:relative}
+.step-num{display:inline-block;background:#7ee787;color:#0a0a0a;font-size:13px;font-weight:800;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+.step-card h3{font-size:17px;color:#fff;margin-bottom:8px}
+.step-card p{font-size:14px;color:#94a3b8}
+.step-card a{color:#7ee787;text-decoration:none;font-weight:600}
+.step-card a:hover{text-decoration:underline}
+.note{background:#7ee78711;border:1px solid #7ee78733;border-radius:12px;padding:16px;margin:12px 0;font-size:13px;color:#7ee787}
+.warn{background:#f59e0b11;border:1px solid #f59e0b33;border-radius:12px;padding:16px;margin:12px 0;font-size:13px;color:#f59e0b}
+.cost-table{width:100%;border-collapse:collapse;margin:16px 0}
+.cost-table th,.cost-table td{padding:12px;text-align:left;border-bottom:1px solid #2a2a3a;font-size:14px}
+.cost-table th{color:#7ee787;font-weight:600}
+.cost-table td{color:#cbd5e1}
+.cost-table .recommend{color:#7ee787;font-weight:700}
+.cta{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#0d1b2a 0%,#1a0533 100%)}
+.cta p{font-size:15px;color:#cbd5e1;margin-bottom:20px;line-height:1.8}
+.cta .note-link{display:inline-block;background:linear-gradient(135deg,#7ee787,#22c55e);color:#0a0a0a;font-size:16px;font-weight:700;padding:16px 40px;border-radius:50px;text-decoration:none;margin-bottom:12px}
+.cta .line-back{display:block;color:#94a3b8;font-size:13px;margin-top:16px}
+.img-placeholder{background:#1a1a2e;border-radius:12px;height:200px;display:flex;align-items:center;justify-content:center;color:#4a4a6a;font-size:14px;margin:12px 0;border:1px dashed #2a2a4a}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<h1>Claude Code 登録ガイド</h1>
+<p>5分で始められます。手順通りにやるだけ。</p>
+</div>
+
+<div class="section">
+<h2>必要なもの</h2>
+<div class="step-card">
+<h3>準備するのは2つだけ</h3>
+<p>① メールアドレス（Gmail推奨）<br>② クレジットカード or デビットカード</p>
+<div class="note">PCからの登録を推奨します。スマホでもできますが、Claude Code自体はPCで使います。</div>
+</div>
+</div>
+
+<div class="section">
+<h2>登録手順</h2>
+
+<div class="step-card">
+<span class="step-num">STEP 1</span>
+<h3>Anthropicアカウント作成</h3>
+<p><a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a> にアクセス。</p>
+<p>「Sign Up」をクリック → メールアドレスで登録。<br>Googleアカウントでのログインも可能です。</p>
+</div>
+
+<div class="step-card">
+<span class="step-num">STEP 2</span>
+<h3>Claude Maxプランに加入</h3>
+<p><a href="https://claude.ai" target="_blank">claude.ai</a> にログイン → 左下の「Upgrade」→「Max」プランを選択。</p>
+<table class="cost-table">
+<tr><th>プラン</th><th>月額</th><th>内容</th></tr>
+<tr><td>Pro</td><td>$20</td><td>Claude Code使用不可</td></tr>
+<tr><td class="recommend">Max (5x)</td><td class="recommend">$100</td><td class="recommend">Claude Code使用可 ← これ</td></tr>
+<tr><td>Max (20x)</td><td>$200</td><td>ヘビーユーザー向け</td></tr>
+</table>
+<div class="warn">ProプランではClaude Codeは使えません。必ずMaxプランを選んでください。</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">STEP 3</span>
+<h3>Claude Codeをインストール</h3>
+<p>ターミナル（Macなら「ターミナル」、Windowsなら「PowerShell」）を開いて、以下を貼り付けてEnter：</p>
+<div style="background:#0d1117;border-radius:8px;padding:16px;margin:12px 0;font-family:monospace;font-size:14px;color:#e6edf3;border:1px solid #21262d;word-break:break-all">
+npm install -g @anthropic-ai/claude-code
+</div>
+<div class="note">Node.jsが必要です。入っていない場合は <a href="https://nodejs.org/" target="_blank" style="color:#7ee787">nodejs.org</a> から先にインストールしてください。</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">STEP 4</span>
+<h3>Claude Codeを起動</h3>
+<p>ターミナルで以下を入力してEnter：</p>
+<div style="background:#0d1117;border-radius:8px;padding:16px;margin:12px 0;font-family:monospace;font-size:14px;color:#e6edf3;border:1px solid #21262d">
+claude
+</div>
+<p>初回起動時にブラウザが開き、Anthropicアカウントでログインを求められます。ログインすれば準備完了。</p>
+</div>
+
+<div class="step-card">
+<span class="step-num">STEP 5</span>
+<h3>日本語で話しかけてみる</h3>
+<p>これで完了です。あとは日本語で何でも頼んでみてください。</p>
+<div style="background:#0d1117;border-radius:8px;padding:16px;margin:12px 0;font-family:monospace;font-size:14px;border:1px solid #21262d">
+<span style="color:#7ee787">あなた：</span><span style="color:#e6edf3">「簡単なToDoアプリを作って」</span>
+</div>
+<p>これだけで、動くアプリが出来上がります。</p>
+</div>
+</div>
+
+<div class="cta">
+<p>登録できたら、実際に触ってみてください。<br>
+「自分にもできる」と実感できるはずです。<br><br>
+ただし、使えるようになっても<br>
+<strong style="color:#fff">それだけでは稼げません。</strong></p>
+<p style="font-size:14px;color:#94a3b8">その理由が知りたい方は<br>LINEに戻って「続き」と送ってください。</p>
+<span class="line-back">← LINEに戻る</span>
+</div>
+
+</body>
+</html>
