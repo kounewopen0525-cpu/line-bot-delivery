@@ -119,6 +119,11 @@ def screencast():
     return render_template("screencast.html")
 
 
+@app.route("/animation")
+def animation():
+    return render_template("animation.html")
+
+
 @app.route("/health", methods=["GET"])
 def health():
     """ヘルスチェック用エンドポイント"""
