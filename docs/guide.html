@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>はじめてのClaude Code セットアップガイド</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.8;-webkit-font-smoothing:antialiased}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);padding:48px 20px 36px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:-30%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(59,130,246,0.15),transparent 70%);border-radius:50%}
+.hero-badge{display:inline-block;background:#3b82f6;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px;letter-spacing:1px}
+.hero h1{font-size:clamp(22px,5.5vw,30px);font-weight:900;color:#fff;margin-bottom:6px;position:relative;z-index:1}
+.hero h1 mark{background:#3b82f6;color:#fff;padding:0 6px;border-radius:4px}
+.hero .sub{color:#94a3b8;font-size:13px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+
+/* CONTAINER */
+.container{max-width:640px;margin:0 auto;padding:0 16px}
+
+/* SECTION TITLE */
+.sec-title{font-size:13px;font-weight:700;color:#94a3b8;letter-spacing:2px;margin:32px 0 16px;padding-left:4px}
+
+/* STEP CARD */
+.card{background:#1e293b;border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #334155}
+.card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.card-num{width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0}
+.card-title{font-size:16px;font-weight:800;color:#fff}
+.card p{font-size:14px;color:#94a3b8;margin-bottom:8px}
+.card a{color:#60a5fa;text-decoration:underline}
+
+/* TIP */
+.tip{background:rgba(234,179,8,0.08);border-left:3px solid #eab308;padding:10px 14px;border-radius:0 10px 10px 0;font-size:13px;color:#eab308;margin:10px 0}
+.warn{background:rgba(239,68,68,0.08);border-left:3px solid #ef4444;padding:10px 14px;border-radius:0 10px 10px 0;font-size:13px;color:#f87171;margin:10px 0}
+
+/* PLAN TABLE */
+.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+.plan{border-radius:12px;padding:14px 8px;text-align:center;border:1px solid #334155}
+.plan.free{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.2)}
+.plan.pro{background:rgba(34,197,94,0.06);border-color:rgba(34,197,94,0.3)}
+.plan.max{background:rgba(234,179,8,0.06);border-color:rgba(234,179,8,0.2)}
+.plan-icon{font-size:20px;margin-bottom:4px}
+.plan-name{font-size:14px;font-weight:800;color:#fff}
+.plan-price{font-size:12px;color:#94a3b8;margin:2px 0}
+.plan-note{font-size:11px;color:#94a3b8}
+.plan.pro .plan-note{color:#22c55e;font-weight:700}
+
+/* CODE BLOCK */
+.code-wrap{position:relative;margin:12px 0}
+.code-label{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px 6px 0 0;letter-spacing:0.5px}
+.code-label.mac{background:#f97316;color:#fff}
+.code-label.win{background:#3b82f6;color:#fff}
+.code-block{background:#0d1117;border:1px solid #21262d;border-radius:0 10px 10px 10px;padding:14px 50px 14px 16px;font-family:'SF Mono','Fira Code','Consolas',monospace;font-size:13px;color:#e6edf3;word-break:break-all;line-height:1.6;display:block;white-space:pre-wrap}
+.code-block .comment{color:#6a737d}
+.copy-btn{position:absolute;top:30px;right:10px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s}
+.copy-btn:hover{background:rgba(59,130,246,0.3)}
+.copy-btn.copied{background:#22c55e;color:#fff;border-color:#22c55e}
+
+/* FLOW */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0}
+.flow-step{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:6px 12px;font-size:12px;color:#e6edf3;font-family:'SF Mono','Consolas',monospace}
+.flow-step small{display:block;font-size:10px;color:#6a737d;font-family:-apple-system,sans-serif}
+.flow-arrow{color:#475569;font-size:16px}
+
+/* ERROR CARD */
+.err{background:#1e293b;border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #334155}
+.err-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.err-icon{width:28px;height:28px;background:rgba(239,68,68,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.err-title{font-size:15px;font-weight:800;color:#fff}
+.err p{font-size:13px;color:#94a3b8;margin-bottom:10px}
+
+/* QUICK REF */
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.ref-box{background:#1e293b;border-radius:12px;padding:16px;border:1px solid #334155}
+.ref-box h4{font-size:13px;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ref-list{list-style:none;font-size:12px;color:#94a3b8}
+.ref-list li{margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.ref-list code{background:#0d1117;padding:2px 8px;border-radius:4px;font-size:11px;color:#e6edf3;font-family:'SF Mono','Consolas',monospace}
+
+/* FOOTER */
+.footer{text-align:center;padding:32px 20px;font-size:12px;color:#475569;border-top:1px solid #1e293b;margin-top:24px}
+.footer a{color:#60a5fa}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">初心者向け</div>
+  <h1>はじめての <mark>Claude Code</mark><br>セットアップガイド</h1>
+  <div class="sub"><span>⏱ 約10分</span><span>💻 Mac / Windows</span><span>🌏 日本語OK</span></div>
+</div>
+
+<div class="container">
+
+<div class="sec-title">▶ 5ステップで完了</div>
+
+<!-- STEP 1 -->
+<div class="card">
+  <div class="card-head"><div class="card-num">1</div><div class="card-title">Anthropicアカウントを作る</div></div>
+  <p>公式サイトでSign upをクリック。Googleアカウントで認証も可能。→ <a href="https://claude.ai" target="_blank">claude.ai</a></p>
+  <div class="tip">💡 すでにClaude.aiを使っている場合はスキップ</div>
+</div>
+
+<!-- STEP 2 -->
+<div class="card">
+  <div class="card-head"><div class="card-num">2</div><div class="card-title">有料プランに入る</div></div>
+  <p>→ <a href="https://claude.ai/upgrade" target="_blank">claude.ai/upgrade</a></p>
+  <div class="plans">
+    <div class="plan free"><div class="plan-icon">❌</div><div class="plan-name">Free</div><div class="plan-price">無料</div><div class="plan-note">Claude Code 不可</div></div>
+    <div class="plan pro"><div class="plan-icon">✅</div><div class="plan-name">Pro</div><div class="plan-price">$20 / 月</div><div class="plan-note">★ おすすめ</div></div>
+    <div class="plan max"><div class="plan-icon">⚡</div><div class="plan-name">Max</div><div class="plan-price">$100〜 / 月</div><div class="plan-note">ヘビーユーザー向け</div></div>
+  </div>
+  <div class="warn">⚠ 無料プランではClaude Codeは利用できません</div>
+</div>
+
+<!-- STEP 3 -->
+<div class="card">
+  <div class="card-head"><div class="card-num">3</div><div class="card-title">Claude Codeをインストール</div></div>
+
+  <div class="code-wrap">
+    <span class="code-label mac">🍎 MAC / LINUX</span>
+    <code class="code-block">curl -fsSL https://claude.ai/install.sh | bash</code>
+    <button class="copy-btn" onclick="copyCmd(this,'curl -fsSL https://claude.ai/install.sh | bash')">コピー</button>
+  </div>
+
+  <div class="code-wrap">
+    <span class="code-label win">🪟 WINDOWS</span>
+    <code class="code-block"><span class="comment"># 先にGit for Windowsを入れてから：</span>
+winget install Anthropic.ClaudeCode</code>
+    <button class="copy-btn" onclick="copyCmd(this,'winget install Anthropic.ClaudeCode')">コピー</button>
+  </div>
+
+  <div class="tip">💡 Windowsの場合は先に <strong>Git for Windows</strong> をインストールしてください</div>
+</div>
+
+<!-- STEP 4 -->
+<div class="card">
+  <div class="card-head"><div class="card-num">4</div><div class="card-title">ログイン</div></div>
+
+  <div class="code-wrap">
+    <span class="code-label mac">ターミナルで順番に実行</span>
+    <code class="code-block">mkdir ~/mywork
+cd ~/mywork
+claude</code>
+    <button class="copy-btn" onclick="copyCmd(this,'mkdir ~/mywork && cd ~/mywork && claude')">コピー</button>
+  </div>
+
+  <p>④「1. Claude account with subscription」を選択<br>⑤ ブラウザが開いたら承認ボタンをクリック</p>
+</div>
+
+<!-- STEP 5 -->
+<div class="card">
+  <div class="card-head"><div class="card-num">5</div><div class="card-title">使ってみる 🎉</div></div>
+  <p>ターミナルで <code style="background:#0d1117;padding:2px 8px;border-radius:4px;font-size:13px">claude</code> を起動したら、日本語でそのまま話しかけるだけ！</p>
+
+  <div class="code-wrap">
+    <span class="code-label mac">例</span>
+    <code class="code-block">$ claude
+> Pythonでフィボナッチ数列を作って
+  → そのままコードを生成・実行してくれます</code>
+  </div>
+
+  <div class="ref-grid">
+    <div class="ref-box">
+      <h4>🔵 確認コマンド</h4>
+      <ul class="ref-list">
+        <li><code>/status</code></li>
+        <li><code>/login</code></li>
+        <li><code>/help</code></li>
+        <li><code>Ctrl+C</code></li>
+      </ul>
+    </div>
+    <div class="ref-box">
+      <h4>🟢 使い方アイデア</h4>
+      <ul class="ref-list">
+        <li>› バグを修正して</li>
+        <li>› このファイルを説明して</li>
+        <li>› テストコードを書いて</li>
+        <li>› READMEを日本語で作って</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TROUBLESHOOTING -->
+<div class="sec-title">▶ エラー別 解決ガイド</div>
+
+<div class="err">
+  <div class="err-head"><div class="err-icon">!</div><div class="err-title">command not found: claude</div></div>
+  <p>インストール後にターミナルを再起動していない、またはPATHが通っていない場合に発生。</p>
+  <div class="code-wrap">
+    <span class="code-label mac">🍎 MAC / LINUX</span>
+    <code class="code-block"><span class="comment"># ターミナルを再起動 or：</span>
+source ~/.bashrc
+source ~/.zshrc</code>
+    <button class="copy-btn" onclick="copyCmd(this,'source ~/.bashrc && source ~/.zshrc')">コピー</button>
+  </div>
+  <div class="code-wrap">
+    <span class="code-label win">🪟 WINDOWS</span>
+    <code class="code-block"><span class="comment"># PowerShellを管理者で再起動</span>
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")</code>
+    <button class="copy-btn" onclick="copyCmd(this,'$env:Path = [System.Environment]::GetEnvironmentVariable(\"Path\",\"Machine\")')">コピー</button>
+  </div>
+  <div class="tip">💡 それでも解消しない場合はインストールをやり直す</div>
+</div>
+
+<div class="err">
+  <div class="err-head"><div class="err-icon">!</div><div class="err-title">Authentication required / ログインできない</div></div>
+  <p>サブスクリプションが有効でない、またはセッションが切れている場合に発生。</p>
+  <div class="code-wrap">
+    <span class="code-label mac">再ログイン</span>
+    <code class="code-block">$ claude
+> /login
+<span class="comment"># ブラウザが開いたら再度承認する</span></code>
+    <button class="copy-btn" onclick="copyCmd(this,'/login')">コピー</button>
+  </div>
+  <div class="warn">⚠ 無料プランではログインできません。Pro以上が必要です</div>
+</div>
+
+<div class="err">
+  <div class="err-head"><div class="err-icon">!</div><div class="err-title">Rate limit exceeded / 使用制限に達した</div></div>
+  <p>短時間に大量のリクエストを送ると発生。しばらく待つか、翌日にリセット。</p>
+  <div class="code-wrap">
+    <span class="code-label mac">状態確認</span>
+    <code class="code-block">> /status
+<span class="comment"># 現在のプランと使用状況を確認</span></code>
+    <button class="copy-btn" onclick="copyCmd(this,'/status')">コピー</button>
+  </div>
+  <div class="tip">💡 Maxプランにアップグレードすると制限が大幅に緩和されます</div>
+</div>
+
+<div class="err">
+  <div class="err-head"><div class="err-icon">!</div><div class="err-title">Permission denied / ファイルを操作できない</div></div>
+  <p>起動ディレクトリ外のファイルにアクセスしようとした場合や、権限不足の場合に発生。</p>
+  <div class="code-wrap">
+    <span class="code-label mac">🍎 MAC / LINUX</span>
+    <code class="code-block"><span class="comment"># 対象フォルダで起動する</span>
+cd /path/to/your/project
+claude</code>
+    <button class="copy-btn" onclick="copyCmd(this,'cd /path/to/your/project && claude')">コピー</button>
+  </div>
+  <div class="code-wrap">
+    <span class="code-label win">🪟 WINDOWS</span>
+    <code class="code-block"><span class="comment"># 管理者としてPowerShellを起動後</span>
+cd C:\path\to\project
+claude</code>
+    <button class="copy-btn" onclick="copyCmd(this,'cd C:\\path\\to\\project && claude')">コピー</button>
+  </div>
+  <div class="tip">💡 プロジェクトのルートフォルダで claude を起動するのがベストプラクティス</div>
+</div>
+
+<div class="err">
+  <div class="err-head"><div class="err-icon">!</div><div class="err-title">Node.js / npm のバージョンエラー</div></div>
+  <p>Claude CodeはNode.js 18以上が必要。古いバージョンの場合に発生。</p>
+  <div class="code-wrap">
+    <span class="code-label mac">バージョン確認 & アップデート</span>
+    <code class="code-block">node --version  <span class="comment"># v18.0.0 以上が必要</span>
+<span class="comment"># nvmでアップデート（Mac/Linux）</span>
+nvm install --lts && nvm use --lts</code>
+    <button class="copy-btn" onclick="copyCmd(this,'nvm install --lts && nvm use --lts')">コピー</button>
+  </div>
+</div>
+
+<!-- QUICK REF -->
+<div class="ref-grid" style="margin-bottom:24px">
+  <div class="ref-box">
+    <h4>🔴 エラー早見表</h4>
+    <ul class="ref-list">
+      <li><code>command not found</code> → 再起動</li>
+      <li><code>Auth required</code> → /login</li>
+      <li><code>Rate limit</code> → 時間を置く</li>
+      <li><code>Permission denied</code> → cd先変更</li>
+      <li><code>ENOENT</code> → パス確認</li>
+      <li><code>Network error</code> → 接続確認</li>
+    </ul>
+  </div>
+  <div class="ref-box">
+    <h4>🔵 困ったときのコマンド</h4>
+    <ul class="ref-list">
+      <li><code>/status</code></li>
+      <li><code>/login</code></li>
+      <li><code>/help</code></li>
+      <li><code>Ctrl+C</code></li>
+      <li><code>exit</code></li>
+    </ul>
+    <p style="font-size:11px;color:#475569;margin-top:8px">公式: <a href="https://docs.anthropic.com/claude-code" target="_blank" style="color:#60a5fa">docs.anthropic.com</a></p>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">© 2025 Anthropic · Claude Code Setup Guide · <a href="https://docs.anthropic.com/claude-code">docs.anthropic.com/claude-code</a></div>
+
+<script>
+function copyCmd(btn,text){
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='✓ コピー済み';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='コピー';btn.classList.remove('copied')},2000);
+  });
+}
+</script>
+</body>
+</html>
