@@ -3,7 +3,7 @@
 
 import os
 
-BASE_URL = os.environ.get("BASE_URL", "https://awrra-240b-10-f02-b600-6818-aedc-60f6-4a6b.a.free.pinggy.link")
+BASE_URL = os.environ.get("BASE_URL", "https://line-bot-delivery.onrender.com")
 
 DEMO_VIDEO_URL = f"{BASE_URL}/screencast"
 REGISTRATION_GUIDE_URL = f"{BASE_URL}/guide"
