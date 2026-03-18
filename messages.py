@@ -5,9 +5,9 @@ import os
 
 BASE_URL = os.environ.get("BASE_URL", "https://line-bot-delivery.onrender.com")
 
-DEMO_VIDEO_URL = f"{BASE_URL}/screencast"
-REGISTRATION_GUIDE_URL = f"{BASE_URL}/guide"
-BRAIN_URL = f"{BASE_URL}/brain"
+DEMO_VIDEO_URL = "https://line-bot-delivery.onrender.com/screencast"
+REGISTRATION_GUIDE_URL = "https://line-bot-delivery.onrender.com/guide"
+BRAIN_URL = "https://line-bot-delivery.onrender.com/brain"
 
 
 # ============================================================
