@@ -8,12 +8,73 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;700;900&family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1e1e2e;font-family:'Courier New','SF Mono','Menlo',monospace;overflow:hidden;height:100vh}
+body{background:#0a0a0f;font-family:'Courier New','SF Mono','Menlo',monospace;overflow:hidden;height:100vh}
+
+/* === COVER / THUMBNAIL === */
+#cover{
+  position:absolute;inset:0;z-index:50;
+  background:#0a0a0f;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:opacity 0.6s;
+}
+#cover.hide{opacity:0;pointer-events:none}
+#cover::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 40%,rgba(126,231,135,0.08) 0%,transparent 60%);
+}
+.cover-terminal{
+  width:90%;max-width:560px;background:#0d1117;border-radius:12px;overflow:hidden;
+  box-shadow:0 20px 80px rgba(0,0,0,0.6);position:relative;
+}
+.cover-bar{
+  background:#161b22;padding:8px 14px;display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid #21262d;
+}
+.cover-dot{width:10px;height:10px;border-radius:50%}
+.cover-dot.r{background:#ff5f57}.cover-dot.y{background:#febc2e}.cover-dot.g{background:#28c840}
+.cover-url{margin-left:10px;color:#8b949e;font-size:11px}
+.cover-body{padding:20px 18px;font-size:13px;line-height:1.8;color:#e6edf3}
+.cover-body .p{color:#7ee787}
+.cover-body .d{color:#484f58}
+.cover-body .ai{color:#c9d1d9}
+.cover-body .s{color:#3fb950}
+
+.play-btn{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:72px;height:72px;background:rgba(126,231,135,0.15);
+  border:2px solid rgba(126,231,135,0.5);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:all 0.3s;
+}
+.play-btn::after{
+  content:'';width:0;height:0;
+  border-top:14px solid transparent;border-bottom:14px solid transparent;
+  border-left:22px solid #7ee787;margin-left:4px;
+}
+#cover:hover .play-btn{
+  background:rgba(126,231,135,0.25);border-color:#7ee787;
+  transform:translate(-50%,-50%) scale(1.1);
+}
+.cover-title{
+  font-family:'Noto Sans JP',sans-serif;font-size:clamp(18px,4vw,26px);
+  font-weight:700;color:#fff;margin-top:24px;text-align:center;position:relative;
+}
+.cover-title span{color:#7ee787}
+.cover-sub{
+  font-family:'Inter',sans-serif;font-size:12px;letter-spacing:3px;
+  color:rgba(255,255,255,0.3);margin-top:8px;text-transform:uppercase;position:relative;
+}
+.cover-duration{
+  position:absolute;bottom:12px;right:14px;
+  background:rgba(0,0,0,0.7);color:#fff;font-size:11px;
+  padding:2px 8px;border-radius:4px;font-family:'Inter',sans-serif;
+}
 
 /* === TERMINAL === */
 #terminal-wrap{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  transition:opacity 0.8s, transform 0.8s;z-index:10;
+  transition:opacity 0.8s, transform 0.8s;z-index:10;display:none;
 }
 #terminal-wrap.hide{opacity:0;transform:scale(0.95);pointer-events:none}
 .terminal{
@@ -96,6 +157,33 @@ pre.code-block{
 </style>
 </head>
 <body>
+
+<!-- COVER / THUMBNAIL -->
+<div id="cover" onclick="startDemo()">
+  <div class="cover-terminal">
+    <div class="cover-bar">
+      <div class="cover-dot r"></div><div class="cover-dot y"></div><div class="cover-dot g"></div>
+      <span class="cover-url">claude &mdash; ~/projects</span>
+    </div>
+    <div class="cover-body">
+      <span class="d">&boxdr;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&boxur;</span><br>
+      <span class="d">&boxv;</span> <span style="color:#a78bfa;font-weight:bold">Claude Code</span> <span class="d">v1.0.16</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">&boxv;</span><br>
+      <span class="d">&boxdl;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&boxul;</span><br>
+      <br>
+      <span class="p">&#10095;</span> <span>&#12363;&#12387;&#12371;&#12356;&#12356;&#12486;&#12461;&#12473;&#12488;&#12450;&#12491;&#12513;&#12540;&#12471;&#12519;&#12531;&#12434;&#20316;&#12387;&#12390;</span><br>
+      <br>
+      <span class="ai">&nbsp;&nbsp;&#25991;&#23383;&#12364;&#12496;&#12521;&#12496;&#12521;&#12395;&#25955;&#12425;&#12400;&#12387;&#12390;&#38598;&#12414;&#12427;&#12450;&#12491;&#12513;&#12540;&#12471;&#12519;&#12531;&#12434;&#20316;&#25104;&#12375;&#12414;&#12377;&#12290;</span><br>
+      <br>
+      <span class="s">&nbsp;&nbsp;&#10003; Created: index.html</span><br>
+      <span class="s">&nbsp;&nbsp;&#10003; Created: anim.js</span><br>
+      <span class="s">&nbsp;&nbsp;&#10003; Created: style.css</span>
+    </div>
+    <div class="play-btn"></div>
+    <div class="cover-duration">0:45</div>
+  </div>
+  <div class="cover-title">&#26085;&#26412;&#35486;&#12391;&#35441;&#12377;&#12384;&#12369;&#12391;&#12289;<span>&#12450;&#12491;&#12513;&#12540;&#12471;&#12519;&#12531;</span>&#12364;&#20316;&#12428;&#12427;</div>
+  <div class="cover-sub">Claude Code Demo</div>
+</div>
 
 <!-- TERMINAL -->
 <div id="terminal-wrap">
@@ -466,7 +554,12 @@ function startTextAnimation(){
   replayBtn.addEventListener('click',()=>createLetters());
 }
 
-window.addEventListener('load',()=>setTimeout(run,500));
+function startDemo(){
+  document.getElementById('cover').classList.add('hide');
+  const tw=document.getElementById('terminal-wrap');
+  tw.style.display='flex';
+  setTimeout(run,400);
+}
 </script>
 </body>
 </html>
