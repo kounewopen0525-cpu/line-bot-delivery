@@ -7,7 +7,7 @@ BASE_URL = os.environ.get("BASE_URL", "https://line-bot-delivery.onrender.com")
 
 DEMO_VIDEO_URL = "https://line-bot-delivery.onrender.com/screencast"
 REGISTRATION_GUIDE_URL = "https://kounewopen0525-cpu.github.io/line-bot-delivery/guide.html"
-BRAIN_URL = "https://line-bot-delivery.onrender.com/brain"
+BRAIN_URL = "https://brain-market.com/u/yutaka_0_1/a/bxkzNxQjMgoTZsNWa0JXY"
 
 
 # ============================================================
